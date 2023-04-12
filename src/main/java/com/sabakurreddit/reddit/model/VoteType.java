@@ -21,4 +21,6 @@ public enum VoteType {
 //    public Integer getDirection() {
 //        return direction;
 //    }
+
+
 }

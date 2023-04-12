@@ -1,5 +1,6 @@
 package com.sabakurreddit.reddit.model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "token")
+//@Table(name = "token")
 public class VerificationToken {
     @Id
     @GeneratedValue(strategy = IDENTITY)
