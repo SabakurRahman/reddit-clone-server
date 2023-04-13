@@ -1,6 +1,7 @@
 package com.sabakurreddit.reddit.service;
 
 import com.sabakurreddit.reddit.dto.RegisterRequest;
+import com.sabakurreddit.reddit.exceptions.SpringRedditException;
 import com.sabakurreddit.reddit.model.NotificationEmail;
 import com.sabakurreddit.reddit.model.User;
 import com.sabakurreddit.reddit.model.VerificationToken;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -53,5 +55,20 @@ public class AuthService {
         verificationToken.setUser(user);
         verificationTokenRepository.save(verificationToken);
         return token;
+    }
+
+    public void verifyAccount(String token) {
+
+        Optional<VerificationToken> verificationToken=verificationTokenRepository.findByToken(token);
+         verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token"));
+         fatchUserAndEnable(verificationToken.get());
+    }
+
+    @Transactional
+    public void fatchUserAndEnable(VerificationToken verificationToken) {
+        String username = verificationToken.getUser().getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new SpringRedditException("User not found with name - " + username));
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }
