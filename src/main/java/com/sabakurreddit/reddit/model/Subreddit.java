@@ -2,6 +2,7 @@ package com.sabakurreddit.reddit.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,10 +16,12 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Subreddit {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
+
     private String name;
     private String description;
     @OneToMany(fetch = LAZY)

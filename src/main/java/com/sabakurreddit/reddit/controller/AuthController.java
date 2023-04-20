@@ -1,5 +1,7 @@
 package com.sabakurreddit.reddit.controller;
 
+import com.sabakurreddit.reddit.dto.AuthenticationRequest;
+import com.sabakurreddit.reddit.dto.AuthenticationResponse;
 import com.sabakurreddit.reddit.dto.RegisterRequest;
 import com.sabakurreddit.reddit.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     @Autowired
@@ -21,6 +24,11 @@ public class AuthController {
         authService.signup(registerRequest);
         return new ResponseEntity<>("User Registration Successful",
                 OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
+        return ResponseEntity.ok(authService.authentication(request));
     }
 
     @GetMapping("/accountVerification/{token}")

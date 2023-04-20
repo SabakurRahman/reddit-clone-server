@@ -1,5 +1,8 @@
 package com.sabakurreddit.reddit.service;
 
+import com.sabakurreddit.reddit.config.JwtService;
+import com.sabakurreddit.reddit.dto.AuthenticationRequest;
+import com.sabakurreddit.reddit.dto.AuthenticationResponse;
 import com.sabakurreddit.reddit.dto.RegisterRequest;
 import com.sabakurreddit.reddit.exceptions.SpringRedditException;
 import com.sabakurreddit.reddit.model.NotificationEmail;
@@ -7,8 +10,17 @@ import com.sabakurreddit.reddit.model.User;
 import com.sabakurreddit.reddit.model.VerificationToken;
 import com.sabakurreddit.reddit.repository.UserRepository;
 import com.sabakurreddit.reddit.repository.VerificationTokenRepository;
+import io.jsonwebtoken.Jwt;
 import lombok.AllArgsConstructor;
 
+
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +41,11 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
 
     private final MailService mailService;
+    private final JwtService jwtService;
+
+
+
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) {
@@ -70,5 +87,37 @@ public class AuthService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new SpringRedditException("User not found with name - " + username));
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public AuthenticationResponse authentication(AuthenticationRequest request) {
+
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
+
+        UserDetails user= userRepository.findByUsername(request.getUsername()).orElseThrow();
+        String jwttoken =jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .authenticationToken(jwttoken)
+                .username(request.getUsername())
+                .build();
+
+
+
+    }
+    @Transactional(readOnly = true)
+    public User getCurrentUser() {
+        return ((User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal());
+    }
+
+    public boolean isLoggedIn() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated();
     }
 }
