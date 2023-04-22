@@ -109,6 +109,8 @@ public class AuthService {
 
 
     }
+
+    //Get UserName
     @Transactional(readOnly = true)
     public User getCurrentUser() {
         return ((User) SecurityContextHolder.getContext()
