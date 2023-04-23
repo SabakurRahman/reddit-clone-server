@@ -66,6 +66,7 @@ public class CommentsService {
         for (Comment comment : comments) {
             CommentsResponse commentsResponse = new CommentsResponse();
             commentsResponse.setId(comment.getId());
+            commentsResponse.setPostId(comment.getPost().getPostId());
             commentsResponse.setCreatedDate(comment.getCreatedDate());
             commentsResponse.setText(comment.getText());
             commentsResponse.setUserName(comment.getUser().getUsername());
