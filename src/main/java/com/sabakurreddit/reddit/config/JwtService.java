@@ -9,13 +9,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 import java.util.function.Function;
 @Service
 public class JwtService {
     private  static  final String SECRATE_KEY = "782F413F4428472B4B6250655367566B5970337336763979244226452948404D";
+    private static final Set<String> activeTokens = new HashSet<>();
     public String exterctUsername(String token) {
         return  extractClaims(token,Claims::getSubject);
     }
@@ -27,17 +27,28 @@ public class JwtService {
             Map<String,Object> extraClims,
             UserDetails userDetails
     ){
-        return Jwts
+       String token = Jwts
                 .builder()
                 .setClaims(extraClims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+1000*60*60*24))
+                .setExpiration(Date.from(Instant.now().plusMillis(exPirationTime())))
                 .signWith(getSignInkey(), SignatureAlgorithm.HS256)
                 .compact();
 
+
+
+        activeTokens.add(token);
+        return token;
+
+    }
+    public void invalidateToken(String token) {
+        activeTokens.remove(token);
     }
 
+    public Long exPirationTime() {
+      return System.currentTimeMillis()+100*60*24;
+    }
 
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

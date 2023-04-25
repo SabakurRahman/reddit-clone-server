@@ -10,10 +10,14 @@ import com.sabakurreddit.reddit.model.User;
 import com.sabakurreddit.reddit.model.VerificationToken;
 import com.sabakurreddit.reddit.repository.UserRepository;
 import com.sabakurreddit.reddit.repository.VerificationTokenRepository;
-import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 
 
+import lombok.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +29,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Key;
+import java.security.SignatureException;
 import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +49,8 @@ public class AuthService {
 
     private final MailService mailService;
     private final JwtService jwtService;
+
+
 
 
 
@@ -69,6 +78,7 @@ public class AuthService {
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken= new VerificationToken();
         verificationToken.setToken(token);
+        verificationToken.setExpiryDate(Instant.now().plusMillis(System.currentTimeMillis()+100*60*24));
         verificationToken.setUser(user);
         verificationTokenRepository.save(verificationToken);
         return token;
@@ -103,6 +113,7 @@ public class AuthService {
         String jwttoken =jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .authenticationToken(jwttoken)
+                .expiresAt(Instant.now().plusMillis(jwtService.exPirationTime()))
                 .username(request.getUsername())
                 .build();
 
@@ -122,4 +133,11 @@ public class AuthService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated();
     }
+
+
+
+
+
+
+
 }
