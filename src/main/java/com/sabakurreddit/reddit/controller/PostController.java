@@ -13,9 +13,12 @@ import java.util.List;
 import static org.springframework.http.ResponseEntity.status;
 
 
+
 @RestController
 @RequestMapping("/api/posts")
 @AllArgsConstructor
+
+
 
 public class PostController {
     private final PostService postService;
@@ -26,7 +29,8 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping
+
+    @GetMapping("/getAll")
     public ResponseEntity<List<PostResponse>> getAllPosts() {
         return status(HttpStatus.OK).body(postService.getAllPosts());
     }

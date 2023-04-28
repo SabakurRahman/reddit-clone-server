@@ -16,6 +16,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/api/subreddit")
 @AllArgsConstructor
 @Slf4j
+
 public class SubredditController {
     private final SubredditService subredditService;
 
